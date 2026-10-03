@@ -1,0 +1,54 @@
+{
+  "app-id": "org.localsend.localsend_gtk",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "50",
+  "sdk": "org.gnome.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ],
+  "command": "localsend-gtk",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=fallback-x11",
+    "--socket=wayland",
+    "--share=network",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.kde.StatusNotifierWatcher",
+    "--filesystem=xdg-download"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "build-args": [
+      "--share=network"
+    ],
+    "env": {
+      "CARGO_HOME": "/run/build/localsend-gtk/cargo"
+    }
+  },
+  "modules": [
+    {
+      "name": "localsend-gtk",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --release --locked",
+        "install -D -m 755 target/release/localsend-gtk /app/bin/localsend-gtk",
+        "install -D -m 644 packaging/rpm/localsend-gtk.desktop /app/share/applications/org.localsend.localsend_gtk.desktop",
+        "sed -i 's/^Icon=localsend-gtk$/Icon=org.localsend.localsend_gtk/' /app/share/applications/org.localsend.localsend_gtk.desktop",
+        "install -D -m 644 packaging/flatpak/org.localsend.localsend_gtk.metainfo.xml /app/share/metainfo/org.localsend.localsend_gtk.metainfo.xml",
+        "install -D -m 644 assets/logo.png /app/share/icons/hicolor/512x512/apps/org.localsend.localsend_gtk.png",
+        "install -D -m 644 LICENSE /app/share/licenses/localsend-gtk/LICENSE",
+        "install -m 644 LICENSES/*.txt /app/share/licenses/localsend-gtk/",
+        "install -D -m 644 THIRD_PARTY_NOTICES.md /app/share/doc/localsend-gtk/THIRD_PARTY_NOTICES.md",
+        "install -D -m 644 vendor/localsend-rs/UPSTREAM.md /app/share/doc/localsend-gtk/localsend-rs/UPSTREAM.md",
+        "install -D -m 644 vendor/localsend-rs/THIRD_PARTY_NOTICES.md /app/share/doc/localsend-gtk/localsend-rs/THIRD_PARTY_NOTICES.md"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "../..",
+          "skip": [".git", "target", "vendor/localsend-rs/target", ".flatpak-builder", "build-dir"]
+        }
+      ]
+    }
+  ]
+}

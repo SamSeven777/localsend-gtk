@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# GNOME Nautilus / Files script to send selected files or directories via LocalSend GTK.
+# Nautilus may expand desktop field codes such as %f in its positional arguments.
+# Its URI environment preserves the selection, including '%' and newlines.
+
+# The tar installer substitutes this assignment for custom installation prefixes.
+localsend_gtk_binary=
+
+fail() {
+    printf 'LocalSend: %s\n' "$1" >&2
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send "LocalSend" "$1" -i localsend-gtk
+    fi
+    exit 1
+}
+
+decode_local_uri() {
+    local uri="$1" rest hex byte
+    case "$uri" in
+        file:///*) rest="${uri#file://}" ;;
+        file://localhost/*) rest="${uri#file://localhost}" ;;
+        *) return 1 ;;
+    esac
+    # URI query/fragment delimiters must be percent-encoded in a local filename.
+    [[ "$rest" != *'?'* && "$rest" != *'#'* ]] || return 1
+    decoded_path=
+    while [[ "$rest" == *%* ]]; do
+        decoded_path+="${rest%%\%*}"
+        rest="${rest#*%}"
+        hex="${rest:0:2}"
+        [[ "$hex" =~ ^[[:xdigit:]]{2}$ && "$hex" != 00 ]] || return 1
+        printf -v byte '%b' "\\x$hex"
+        decoded_path+="$byte"
+        rest="${rest:2}"
+    done
+    decoded_path+="$rest"
+}
+
+if [[ ${NAUTILUS_SCRIPT_SELECTED_URIS+x} ]]; then
+    selected_paths=()
+    while IFS= read -r uri || [[ -n "$uri" ]]; do
+        [[ -n "$uri" ]] || continue
+        decode_local_uri "$uri" || fail "Only valid local files and folders can be sent."
+        selected_paths+=("$decoded_path")
+    done <<< "$NAUTILUS_SCRIPT_SELECTED_URIS"
+    ((${#selected_paths[@]})) || fail "Select one or more local files or folders to send."
+    set -- "${selected_paths[@]}"
+fi
+
+# End option parsing so manual invocations with names such as --help are safe.
+if [[ -n "$localsend_gtk_binary" ]]; then
+    exec "$localsend_gtk_binary" -- "$@"
+elif command -v localsend-gtk >/dev/null 2>&1; then
+    exec localsend-gtk -- "$@"
+elif [[ -x "$HOME/.local/bin/localsend-gtk" ]]; then
+    exec "$HOME/.local/bin/localsend-gtk" -- "$@"
+elif [[ -x "/usr/local/bin/localsend-gtk" ]]; then
+    exec "/usr/local/bin/localsend-gtk" -- "$@"
+elif [[ -x "/usr/bin/localsend-gtk" ]]; then
+    exec "/usr/bin/localsend-gtk" -- "$@"
+else
+    fail "Could not find localsend-gtk binary on PATH."
+fi

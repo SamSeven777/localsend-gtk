@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/localsend/localsend_gtk">
+    <file>assets/logo.png</file>
+    <file>assets/css/style.css</file>
+    <file>assets/icons/scalable/actions/ls-wifi-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-send-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-settings-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-history-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-info-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-language-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-description-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-folder-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-subject-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-content-paste-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-refresh-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-close-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-ads-click-symbolic.svg</file>
+    <file>assets/icons/scalable/actions/ls-favorite-symbolic.svg</file>
+  </gresource>
+</gresources>

@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    name: Build Release Packages
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check release version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+          import tomllib
+
+          version = tomllib.loads(pathlib.Path("Cargo.toml").read_text())["package"]["version"]
+          assert re.fullmatch(r"\d+\.\d+\.\d+", version), "Expected a stable release version"
+          assert os.environ["RELEASE_TAG"] == f"v{version}", "Tag and Cargo.toml versions differ"
+          lock = tomllib.loads(pathlib.Path("Cargo.lock").read_text())
+          assert next(p["version"] for p in lock["package"] if p["name"] == "localsend-gtk") == version, "Cargo.lock version differs"
+          spec = pathlib.Path("packaging/rpm/localsend-gtk.spec").read_text()
+          assert re.search(r"^Version:\s*(\S+)", spec, re.M).group(1) == version, "RPM spec version differs"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print(f"version={version}", file=output)
+          PY
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libssl-dev pkg-config binutils dpkg-dev rpm desktop-file-utils python3
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Restore Rust build cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check source and tests
+        run: |
+          python3 scripts/test-nautilus.py
+          cargo fmt --all --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked
+          cargo test --manifest-path vendor/localsend-rs/Cargo.toml --no-default-features --features https --test interop_receiver_cancel
+
+      - name: Install RPM packaging tool
+        run: cargo install cargo-generate-rpm --version 0.21.0 --locked
+
+      - name: Build and package release artifacts
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: bash scripts/package-release.sh
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/dist/localsend-gtk-v${{ steps.version.outputs.version }}-linux-x86_64.tar.gz
+            target/dist/localsend-gtk_${{ steps.version.outputs.version }}-1_amd64.deb
+            target/dist/localsend-gtk-${{ steps.version.outputs.version }}-1.x86_64.rpm
+            target/dist/SHA256SUMS
+          fail_on_unmatched_files: true
+          # Publish after validating the downloaded packages and checksums.
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          body_path: docs/releases/${{ github.ref_name }}.md

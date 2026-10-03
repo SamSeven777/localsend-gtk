@@ -1,0 +1,20 @@
+pkgbase = localsend-gtk-bin
+	pkgdesc = Native GTK4/Adwaita GUI for LocalSend in Rust (prebuilt binary)
+	pkgver = 1.0.4
+	pkgrel = 1
+	url = https://github.com/SamSeven777/localsend-gtk
+	arch = x86_64
+	license = MIT
+	license = Apache-2.0
+	depends = glibc>=2.39
+	depends = gtk4>=4.12
+	depends = libadwaita>=1.5
+	depends = openssl
+	optdepends = kio: Send with LocalSend action in Dolphin
+	optdepends = nautilus: Send with LocalSend script (enable per user; see README)
+	provides = localsend-gtk
+	conflicts = localsend-gtk
+	source = localsend-gtk-v1.0.4-linux-x86_64.tar.gz::https://github.com/SamSeven777/localsend-gtk/releases/download/v1.0.4/localsend-gtk-v1.0.4-linux-x86_64.tar.gz
+	sha256sums = c8802ffe70e256b0a4f451139bee8e2833f5004907bd10ead108722d79c2249a
+
+pkgname = localsend-gtk-bin

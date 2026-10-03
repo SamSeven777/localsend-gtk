@@ -1,0 +1,5 @@
+target/
+upstream-localsend/
+*.rpm
+resources.gresource
+vendor/localsend-rs/Cargo.lock

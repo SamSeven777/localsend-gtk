@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LocalSend · Upload</title>
+<style>
+:root{color-scheme:light dark;font:16px system-ui,sans-serif;color:#163b35;background:#f6faf8}
+body{margin:0;padding:48px 20px}main{max-width:460px;margin:auto;text-align:center}h1{font-size:32px;letter-spacing:-1px}
+p{line-height:1.6}.hint{color:#526862;font-size:14px}.drop{margin:32px 0 20px;padding:32px 24px;border:2px dashed #a5bfb8;border-radius:24px}.drop.over{background:#d8eee7;border-color:#00796b}
+button{font:600 18px system-ui;border:0;border-radius:24px;padding:16px 32px;background:#00796b;color:white;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#cancel{background:transparent;color:inherit;font-size:14px;padding:12px}progress{width:100%;accent-color:#00796b}#status{overflow-wrap:anywhere}a{color:inherit}
+@media(prefers-color-scheme:dark){:root{background:#10211e;color:#dcebe5}.hint{color:#a8c0b6}.drop{border-color:#44655a}.drop.over{background:#1c3c31}button{background:#a2d5bf;color:#14352c}}
+</style>
+<main>
+<h1>LocalSend</h1>
+<p>Send files to this device</p>
+<div class="drop" id="drop"><button id="choose">Choose files</button><input id="files" type="file" multiple hidden><p class="hint">or drop files here</p></div>
+<p id="status" role="status" aria-live="polite">The receiver will approve the files you select.</p>
+<progress id="progress" max="1" value="0" hidden></progress><button id="cancel" hidden>Cancel</button>
+<p class="hint">Keep this page open until the transfer finishes.<br>This temporary HTTP link is unencrypted. Use a trusted local network.</p>
+<noscript>Enable JavaScript to send files.</noscript>
+</main>
+<script>
+'use strict';
+const choose=document.getElementById('choose'), input=document.getElementById('files'), drop=document.getElementById('drop'), status=document.getElementById('status'), progress=document.getElementById('progress'), cancel=document.getElementById('cancel');
+let busy=false, controller=null, token=null, xhr=null, requestId=null;
+const base=location.pathname;
+function withdraw(){if(requestId)fetch(base+'withdraw/'+requestId,{method:'POST',keepalive:true}).catch(()=>{});}
+function message(code){return ({400:'A file name or size was not accepted.',403:'The receiver declined the transfer or approval timed out.',404:'This link has expired. Ask the receiver for a new link.',409:'The receiver is busy. Please try again shortly.',410:'The receiver stopped this link.',413:'The selection is too large (maximum 100 GB).',408:'The upload timed out.'})[code]||'The transfer could not finish. Check the receiver and your connection.';}
+function sendFile(file,id,total,completed){return new Promise((resolve,reject)=>{xhr=new XMLHttpRequest();xhr.open('POST',base+'upload/'+token+'/'+id);xhr.upload.onprogress=e=>{if(e.lengthComputable){progress.value=total?(completed+e.loaded)/total:1;status.textContent='Sending '+file.name+' · '+Math.round(progress.value*100)+'%';}};xhr.onload=()=>xhr.status===204?resolve():reject(Error(message(xhr.status)));xhr.onerror=()=>reject(Error('Connection lost. Check the receiver and try again.'));xhr.onabort=()=>reject(Error('Transfer cancelled.'));xhr.send(file);});}
+async function send(files){if(busy||!files.length)return;if(files.length>512){status.textContent='Choose up to 512 files at a time.';return;}busy=true;choose.disabled=true;cancel.hidden=false;controller=new AbortController();token=null;requestId=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');status.textContent='Waiting for the receiver to approve…';progress.hidden=true;
+try{const response=await fetch(base+'offer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId,files:files.map(f=>({name:f.name,size:f.size}))}),signal:controller.signal});if(!response.ok)throw Error(message(response.status));const approval=await response.json();token=approval.token;const selected=approval.files.map(Number);const total=selected.reduce((sum,id)=>sum+files[id].size,0);let completed=0;progress.hidden=false;progress.value=0;for(const id of selected){await sendFile(files[id],id,total,completed);completed+=files[id].size;}progress.value=1;status.textContent=selected.length===files.length?'All files sent successfully.':selected.length+' of '+files.length+' files sent. The receiver skipped the others.';token=null;requestId=null;}
+catch(error){status.textContent=error.name==='AbortError'?'Transfer cancelled.':error.message;withdraw();}
+finally{busy=false;choose.disabled=false;cancel.hidden=true;input.value='';token=null;xhr=null;controller=null;requestId=null;}}
+choose.onclick=()=>input.click();input.onchange=()=>send(Array.from(input.files));
+drop.ondragover=e=>{e.preventDefault();if(!busy)drop.classList.add('over');};drop.ondragleave=()=>drop.classList.remove('over');drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');send(Array.from(e.dataTransfer.files));};
+cancel.onclick=()=>{withdraw();if(controller)controller.abort();if(xhr)xhr.abort();};
+window.addEventListener('pagehide',()=>{if(requestId)navigator.sendBeacon(base+'withdraw/'+requestId);});
+</script>
+</html>

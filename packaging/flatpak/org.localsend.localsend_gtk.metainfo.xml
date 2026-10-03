@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.localsend.localsend_gtk</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT AND Apache-2.0</project_license>
+  <name>LocalSend GTK</name>
+  <summary>An open-source cross-platform alternative to AirDrop (GTK4/Wayland)</summary>
+  <description>
+    <p>
+      LocalSend GTK is a native Linux client for LocalSend built with GTK4, Libadwaita, and Rust.
+      It enables secure file and message sharing between devices on your local network without an internet connection.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>End-to-end encryption with HTTPS and pinned certificates</li>
+      <li>Native GTK4 and Libadwaita interface with standard dark/light mode and Material 3 accents</li>
+      <li>Native Wayland rendering and GTK display scaling</li>
+      <li>Interactive desktop notifications for incoming transfers</li>
+      <li>Drag-and-drop integration with Linux file managers</li>
+      <li>LocalSend protocol support for sharing with official mobile and desktop clients</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">org.localsend.localsend_gtk.desktop</launchable>
+  <url type="homepage">https://github.com/SamSeven777/localsend-gtk</url>
+  <url type="bugtracker">https://github.com/SamSeven777/localsend-gtk/issues</url>
+  <developer id="io.github.samseven777">
+    <name>LocalSend GTK Contributors</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-10-03">
+      <description><p>Native GTK4 client with corrected receive confirmation, IP address connections and an animated receive logo.</p></description>
+    </release>
+  </releases>
+</component>

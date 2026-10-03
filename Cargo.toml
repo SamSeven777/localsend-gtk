@@ -1,0 +1,76 @@
+[package]
+name = "localsend-gtk"
+version = "0.1.0"
+edition = "2021"
+authors = ["LocalSend GTK Maintainers"]
+description = "GTK4 LocalSend client for Wayland with an upstream-inspired interface"
+license = "MIT"
+repository = "https://github.com/SamSeven777/localsend-gtk"
+homepage = "https://github.com/SamSeven777/localsend-gtk"
+readme = "README.md"
+
+[dependencies]
+# Native GTK4 & libadwaita
+gtk4 = { version = "0.9", features = ["v4_12"] }
+adw = { package = "libadwaita", version = "0.7", features = ["v1_5"] }
+gdk4 = "0.9"
+gio = "0.20"
+gdk-pixbuf = "0.20"
+glib = "0.20"
+# HCT/TonalSpot algorithms used by the upstream Flutter color scheme.
+material-colors = "=0.4.2"
+
+# LocalSend Protocol
+localsend-rs = { git = "https://github.com/CrossCopy/localsend-rs.git", rev = "428981a012c77404e2605ae7b630b50bcbe8ce0f", default-features = false, features = ["https"] }
+
+# Async runtime & Channels
+tokio = { version = "1.40", features = ["full"] }
+async-channel = "2.3"
+directories = "5.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4"] }
+chrono = "0.4"
+rand = "0.9"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+reqwest = { version = "0.13", default-features = false, features = ["json", "query", "stream", "rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-pemfile = "2"
+tokio-util = { version = "0.7", features = ["io", "rt"] }
+futures-util = "0.3"
+axum = { version = "0.8", features = ["json", "http1", "tokio"] }
+libc = "0.2"
+async-trait = "0.1"
+qrcode = { version = "0.14", default-features = false }
+ksni = "0.3.6"
+
+[dev-dependencies]
+tempfile = "3"
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+
+[profile.dev]
+debug = 0
+
+[patch."https://github.com/CrossCopy/localsend-rs.git"]
+localsend-rs = { path = "vendor/localsend-rs" }
+
+[package.metadata.generate-rpm]
+license = "MIT AND Apache-2.0"
+assets = [
+    { source = "target/release/localsend-gtk", dest = "/usr/bin/localsend-gtk", mode = "755" },
+    { source = "packaging/rpm/localsend-gtk.desktop", dest = "/usr/share/applications/org.localsend.localsend_gtk.desktop", mode = "644" },
+    { source = "packaging/desktop/localsend-dolphin.desktop", dest = "/usr/share/kio/servicemenus/localsend-dolphin.desktop", mode = "644" },
+    { source = "packaging/desktop/nautilus-scripts/Send with LocalSend", dest = "/usr/share/nautilus-scripts/Send with LocalSend", mode = "755" },
+    { source = "assets/logo.png", dest = "/usr/share/icons/hicolor/512x512/apps/localsend-gtk.png", mode = "644" },
+    { source = "LICENSE", dest = "/usr/share/doc/localsend-gtk/LICENSE", mode = "644" },
+    { source = "README.md", dest = "/usr/share/doc/localsend-gtk/README.md", mode = "644" },
+    { source = "THIRD_PARTY_NOTICES.md", dest = "/usr/share/doc/localsend-gtk/THIRD_PARTY_NOTICES.md", mode = "644" },
+    { source = "LICENSES/*.txt", dest = "/usr/share/licenses/localsend-gtk/", mode = "644" },
+    { source = "vendor/localsend-rs/UPSTREAM.md", dest = "/usr/share/doc/localsend-gtk/localsend-rs/UPSTREAM.md", mode = "644" },
+    { source = "vendor/localsend-rs/THIRD_PARTY_NOTICES.md", dest = "/usr/share/doc/localsend-gtk/localsend-rs/THIRD_PARTY_NOTICES.md", mode = "644" },
+]
+
+[package.metadata.generate-rpm.requires]
+gtk4 = ">= 4.12"
+libadwaita = ">= 1.5"

@@ -1,0 +1,36 @@
+name: Linux GTK4
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test browser upload behavior
+        run: node scripts/test-browser.cjs
+      - name: Test browser download behavior
+        run: node --test scripts/test-web-share.cjs
+      - name: Test Nautilus selection and launcher paths
+        run: python3 scripts/test-nautilus.py
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libssl-dev pkg-config weston dbus-x11 fonts-noto-core fonts-noto-cjk
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked
+      - run: dbus-run-session -- env LOCALSEND_TRAY_TEST_BUS=1 cargo test --locked tray_private_bus_registers_activates_recovers_and_unregisters -- --ignored --test-threads=1 --nocapture
+      - run: bash scripts/test-wayland.sh
+      - name: File manager startup and single-instance forwarding
+        run: |
+          cargo build --locked
+          bash scripts/test-wayland.sh python3 scripts/test-file-open.py
+      - name: High contrast Wayland rendering
+        run: ADW_DEBUG_HIGH_CONTRAST=1 LOCALSEND_SCREENSHOT_DIR=target/screenshots-high-contrast bash scripts/test-wayland.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayland-screenshots
+          path: |
+            target/screenshots/*.png
+            target/screenshots-high-contrast/*.png
