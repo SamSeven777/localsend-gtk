@@ -8,6 +8,20 @@ typographic hierarchy, theme roles, terminology, selection workflow and transfer
 feedback. Font selection follows the system's Fontconfig configuration; rendering
 need not be pixel-for-pixel identical across different toolkits.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-receive-light.png" alt="LocalSend GTK Receive Page" width="800">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/02-send-selection.png" alt="LocalSend GTK Send Page" width="800">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/03-settings-dark.png" alt="LocalSend GTK Settings Page (Dark Theme)" width="800">
+</p>
+
 ## Implemented
 
 - Receive, Send and Settings views; full sidebar at 800 px, icon rail at 700–799 px,
@@ -24,10 +38,10 @@ need not be pixel-for-pixel identical across different toolkits.
   German, French, Spanish and Russian,
   with official terminology and system-selected language fallback. Changing language
   preserves selection, theme choices and active transfers.
-- The upstream logo, 200 px receive mark, 48 px device name and 24 px visual ID,
-  plus centered 600 px content. Short windows use smaller type and artwork; narrow
-  windows use a balanced two-column file picker. Notifications leave the receive
-  action and bottom navigation accessible.
+- The upstream logo with 15-second rotation (pausing when the receiver stops),
+  200 px receive mark, 48 px device name and 24 px visual ID, plus centered 600 px content.
+  Short windows use smaller type and artwork; narrow windows use a balanced two-column
+  file picker. Notifications leave the receive action and bottom navigation accessible.
 - Native GTK file/folder dialogs with Wayland portal integration, recursive folder
   selection, text, clipboard text/files, drag and drop, and individual removal.
 - Compact selection thumbnails with Edit/Add, a selection editor with text editing
@@ -146,6 +160,8 @@ its `share` directory must be on the desktop session's XDG data search path for
 the launcher and Dolphin menu to appear. The installer writes absolute executable
 and icon paths, so launching does not depend on adding its `bin` directory to `PATH`.
 
+Package recipes are also provided for Arch Linux (`packaging/aur`) and Flatpak (`packaging/flatpak`), though they are not published to official repositories.
+
 Packages also include a **Send with LocalSend** script for local files and folders
 in GNOME Files (Nautilus). Nautilus discovers scripts only in
 `${XDG_DATA_HOME:-$HOME/.local/share}/nautilus/scripts`, not system XDG data paths.
@@ -223,8 +239,7 @@ messages always require an explicit action in every mode.
 Folder selection skips symlinks to avoid cycles and files outside the selected
 folder. Empty directories are not transmitted.
 
-Manual addresses accept IPv4, IPv6 or a LocalSend `#0`–`#255` shortcut. Shortcuts
-use the final IPv4 octet on each local network and use the configured port.
+Manual addresses accept full IPv4 or IPv6 literals (hashtag `#` shortcut lookup has been removed).
 
 Tray integration uses the StatusNotifierItem desktop interface. Show tray icon
 and Minimize to tray are independent settings: closing can keep the receiver in
