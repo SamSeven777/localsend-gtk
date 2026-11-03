@@ -185,7 +185,7 @@
   "Protocol": "协议",
   "The recipient requires a valid PIN.": "接收方要求输入有效的 PIN 码。",
   "Alias: {alias}\nIP: {ip}\nPort: {port}\nProtocol: HTTPS": "设备名称：{alias}\nIP：{ip}\n端口：{port}\n协议：HTTPS",
-  "A community GTK4 client for LocalSend.\n\nVersion 0.1.0\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "由社区开发的 LocalSend GTK4 客户端。\n\n版本 0.1.0\nRust · GTK4 · Wayland\n\n界面和标志基于 LocalSend（Apache-2.0）。本项目独立于官方 LocalSend 应用。",
+  "A community GTK4 client for LocalSend.\n\nVersion 0.1.1\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "由社区开发的 LocalSend GTK4 客户端。\n\n版本 0.1.1\nRust · GTK4 · Wayland\n\n界面和标志基于 LocalSend（Apache-2.0）。本项目独立于官方 LocalSend 应用。",
   "1. Open LocalSend on both devices.\n2. Connect both devices to the same local network.\n3. Allow TCP and UDP port 53317 through your firewall (or the port selected in Settings).\n4. Disable access-point isolation on guest Wi-Fi.\n5. Check that a VPN is not blocking local traffic, then refresh.": "1. 在两台设备上打开 LocalSend。\n2. 将两台设备连接到同一局域网。\n3. 在防火墙中允许 TCP 和 UDP 端口 53317（或设置中选择的端口）通过。\n4. 关闭访客 Wi-Fi 的接入点隔离。\n5. 检查 VPN 是否阻止了本地流量，然后刷新。",
   "Compact sidebar on narrow windows": "窄窗口紧凑侧边栏",
   "Keep the left navigation rail instead of showing a bottom bar": "在窗口较窄时保留左侧图标导航栏，不显示底部栏",
