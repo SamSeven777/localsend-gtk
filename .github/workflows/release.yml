@@ -45,7 +45,17 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libssl-dev pkg-config binutils dpkg-dev rpm desktop-file-utils python3
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libssl-dev pkg-config binutils dpkg-dev rpm desktop-file-utils python3 zsync squashfs-tools
+
+      - name: Install AppImage tooling
+        run: |
+          mkdir -p target/appimage-tools
+          curl -fL https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage \
+            -o target/appimage-tools/appimagetool-x86_64.AppImage
+          printf '%s  %s\n' \
+            'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0' \
+            'target/appimage-tools/appimagetool-x86_64.AppImage' | sha256sum -c -
+          chmod +x target/appimage-tools/appimagetool-x86_64.AppImage
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -71,6 +81,18 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: bash scripts/package-release.sh
 
+      - name: Build AppImage and zsync
+        env:
+          APPIMAGETOOL: ${{ github.workspace }}/target/appimage-tools/appimagetool-x86_64.AppImage
+          APPIMAGETOOL_EXTRACT: "1"
+        run: bash scripts/package-appimage.sh
+
+      - name: Finalize release checksums
+        run: |
+          cd target/dist
+          cat localsend-gtk-*.AppImage.sha256 >> SHA256SUMS
+          sha256sum --check SHA256SUMS
+
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -78,9 +100,12 @@ jobs:
             target/dist/localsend-gtk-v${{ steps.version.outputs.version }}-linux-x86_64.tar.gz
             target/dist/localsend-gtk_${{ steps.version.outputs.version }}-1_amd64.deb
             target/dist/localsend-gtk-${{ steps.version.outputs.version }}-1.x86_64.rpm
+            target/dist/localsend-gtk-v${{ steps.version.outputs.version }}-linux-x86_64.AppImage
+            target/dist/localsend-gtk-v${{ steps.version.outputs.version }}-linux-x86_64.AppImage.zsync
             target/dist/SHA256SUMS
           fail_on_unmatched_files: true
           # Publish after validating the downloaded packages and checksums.
+          # Gearlever only detects the update after this draft is published.
           draft: true
           prerelease: false
           generate_release_notes: true
