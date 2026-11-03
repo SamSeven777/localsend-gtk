@@ -1882,8 +1882,14 @@ mod tests {
 
 pub fn install_styles() {
     gio::resources_register_include!("localsend.gresource").expect("Bundled icons");
-    gtk::IconTheme::for_display(&gdk::Display::default().expect("No display"))
-        .add_resource_path("/org/localsend/localsend_gtk/assets/icons");
+    let icon_theme = gtk::IconTheme::for_display(&gdk::Display::default().expect("No display"));
+    icon_theme.add_resource_path("/org/localsend/localsend_gtk/assets/icons");
+    if let Some(appdir) = std::env::var_os("APPDIR") {
+        let icons = PathBuf::from(appdir).join("usr/share/icons");
+        if icons.is_dir() {
+            icon_theme.add_search_path(&icons);
+        }
+    }
     let provider = gtk::CssProvider::new();
     provider.load_from_string(include_str!("../assets/css/style.css"));
     gtk::style_context_add_provider_for_display(
@@ -2073,6 +2079,11 @@ pub fn build(app: &adw::Application, mut settings: Settings, offline_fixture: bo
         .default_height(700)
         .build();
     i18n::bind_property(&window, "title", "LocalSend");
+    window.set_icon_name(Some(if crate::desktop::appimage_path().is_some() {
+        "org.localsend.localsend_gtk"
+    } else {
+        "localsend-gtk"
+    }));
     window.add_css_class("localsend");
     if settings.oled {
         window.add_css_class("oled");

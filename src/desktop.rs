@@ -215,6 +215,26 @@ fn config_directory() -> io::Result<PathBuf> {
         .ok_or_else(|| io::Error::other("Could not locate the user configuration directory"))
 }
 
+/// The outer AppImage file when the runtime provides a valid path.
+pub(crate) fn appimage_path() -> Option<PathBuf> {
+    std::env::var_os("APPIMAGE")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute() && path.is_file())
+}
+
+/// A user-visible launcher must outlive the current process. AppImage runs
+/// from a temporary mount, so prefer the outer `.AppImage` file when present.
+fn launch_executable() -> io::Result<PathBuf> {
+    launch_executable_from(appimage_path().as_deref())
+}
+
+fn launch_executable_from(appimage: Option<&Path>) -> io::Result<PathBuf> {
+    if let Some(path) = appimage.filter(|path| path.is_absolute() && path.is_file()) {
+        return Ok(path.to_owned());
+    }
+    std::env::current_exe()
+}
+
 /// Flatpak requires the Background portal to register host login startup.
 /// Check the sandbox marker rather than an inherited environment variable.
 pub fn autostart_supported() -> bool {
@@ -224,7 +244,7 @@ pub fn autostart_supported() -> bool {
 /// Update only this app's managed autostart file; enabling never launches it.
 pub fn set_autostart(enabled: bool, start_minimized: bool) -> io::Result<()> {
     let executable = if enabled {
-        Some(std::env::current_exe()?)
+        Some(launch_executable()?)
     } else {
         None
     };
@@ -349,6 +369,22 @@ fn desktop_entry(executable: &Path, start_minimized: bool) -> io::Result<String>
 mod tests {
     use super::*;
     use ksni::Tray;
+
+    #[test]
+    fn appimage_launch_path_avoids_the_transient_mount() {
+        let root = tempfile::tempdir().unwrap();
+        let appimage = root.path().join("LocalSend GTK.AppImage");
+        std::fs::write(&appimage, b"appimage").unwrap();
+        assert_eq!(launch_executable_from(Some(&appimage)).unwrap(), appimage);
+        assert_eq!(
+            launch_executable_from(Some(Path::new("relative.AppImage"))).unwrap(),
+            std::env::current_exe().unwrap()
+        );
+        assert_eq!(
+            launch_executable_from(Some(&root.path().join("missing.AppImage"))).unwrap(),
+            std::env::current_exe().unwrap()
+        );
+    }
 
     #[test]
     fn flatpak_autostart_rejects_enabling_and_cleans_only_stale_owned_entries() {
