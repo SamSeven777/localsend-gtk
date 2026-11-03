@@ -28,7 +28,8 @@ and a matching `.sha256` file.
 
 The script validates the AppDir contract before packaging: one root desktop
 file, a matching icon and `.DirIcon`, an executable `AppRun`, AppStream
-metadata and `StartupWMClass=org.localsend.localsend_gtk`.
+metadata, `StartupWMClass=org.localsend.localsend_gtk`,
+`X-AppImage-Name=LocalSend GTK` and the `Network;FileTransfer;` categories.
 
 ## Update information and zsync
 
