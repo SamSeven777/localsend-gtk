@@ -47,6 +47,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libssl-dev pkg-config binutils dpkg-dev rpm desktop-file-utils python3 zsync squashfs-tools
 
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Restore Rust build cache
+        uses: Swatinem/rust-cache@v2
+
       - name: Install AppImage tooling
         run: |
           mkdir -p target/appimage-tools
@@ -56,14 +64,6 @@ jobs:
             'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0' \
             'target/appimage-tools/appimagetool-x86_64.AppImage' | sha256sum -c -
           chmod +x target/appimage-tools/appimagetool-x86_64.AppImage
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Restore Rust build cache
-        uses: Swatinem/rust-cache@v2
 
       - name: Check source and tests
         run: |
