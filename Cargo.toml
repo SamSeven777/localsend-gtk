@@ -1,6 +1,6 @@
 [package]
 name = "localsend-gtk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["LocalSend GTK Maintainers"]
 description = "GTK4 LocalSend client for Wayland with an upstream-inspired interface"

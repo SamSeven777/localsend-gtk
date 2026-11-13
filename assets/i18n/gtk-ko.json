@@ -185,7 +185,7 @@
   "Protocol": "프로토콜",
   "The recipient requires a valid PIN.": "받는 사람이 올바른 PIN 번호를 요구합니다.",
   "Alias: {alias}\nIP: {ip}\nPort: {port}\nProtocol: HTTPS": "기기 이름: {alias}\nIP: {ip}\n포트: {port}\n프로토콜: HTTPS",
-  "A community GTK4 client for LocalSend.\n\nVersion 0.1.0\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "커뮤니티에서 만든 LocalSend용 GTK4 클라이언트입니다.\n\n버전 0.1.0\nRust · GTK4 · Wayland\n\n인터페이스와 로고는 LocalSend(Apache-2.0)를 기반으로 합니다. 이 프로젝트는 공식 LocalSend 앱과 독립적입니다.",
+  "A community GTK4 client for LocalSend.\n\nVersion 0.1.1\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "커뮤니티에서 만든 LocalSend용 GTK4 클라이언트입니다.\n\n버전 0.1.1\nRust · GTK4 · Wayland\n\n인터페이스와 로고는 LocalSend(Apache-2.0)를 기반으로 합니다. 이 프로젝트는 공식 LocalSend 앱과 독립적입니다.",
   "1. Open LocalSend on both devices.\n2. Connect both devices to the same local network.\n3. Allow TCP and UDP port 53317 through your firewall (or the port selected in Settings).\n4. Disable access-point isolation on guest Wi-Fi.\n5. Check that a VPN is not blocking local traffic, then refresh.": "1. 두 기기에서 LocalSend를 여세요.\n2. 두 기기를 같은 로컬 네트워크에 연결하세요.\n3. 방화벽에서 TCP 및 UDP 포트 53317(또는 설정에서 선택한 포트)을 허용하세요.\n4. 게스트 Wi-Fi의 액세스 포인트 격리를 비활성화하세요.\n5. VPN이 로컬 통신을 차단하고 있지 않은지 확인한 후 새로 고침하세요.",
   "Compact sidebar on narrow windows": "좁은 창에서 컴팩트 사이드바 사용",
   "Keep the left navigation rail instead of showing a bottom bar": "하단 바를 표시하는 대신 왼쪽 탐색 레일을 유지합니다",

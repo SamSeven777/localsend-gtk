@@ -28,6 +28,9 @@
   </developer>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.1" date="2026-11-03">
+      <description><p>Thin AppImage builds with zsync update metadata, dock association and AppImage-aware autostart.</p></description>
+    </release>
     <release version="0.1.0" date="2026-10-03">
       <description><p>Native GTK4 client with corrected receive confirmation, IP address connections and an animated receive logo.</p></description>
     </release>

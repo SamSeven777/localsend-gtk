@@ -5,12 +5,14 @@ GenericName=File Transfer
 Comment=An open source cross-platform alternative to AirDrop (GTK4/Wayland)
 Exec=localsend-gtk %U
 Icon=localsend-gtk
-Categories=Network;FileTransfer;Utility;
+Categories=Network;FileTransfer;
 Terminal=false
 StartupNotify=true
+StartupWMClass=org.localsend.localsend_gtk
 MimeType=application/octet-stream;inode/directory;
 Keywords=localsend;airdrop;transfer;sharing;lan;network;gtk;
 X-Wayland-Native=true
+X-AppImage-Name=LocalSend GTK
 Actions=SendWithLocalSend;
 
 [Desktop Action SendWithLocalSend]

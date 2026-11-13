@@ -20,6 +20,10 @@ fn main() -> glib::ExitCode {
     if std::env::var_os("WAYLAND_DISPLAY").is_some() && std::env::var_os("GDK_BACKEND").is_none() {
         std::env::set_var("GDK_BACKEND", "wayland");
     }
+    // Match X11 WM_CLASS and the Wayland app ID to the desktop entry. Desktop
+    // integration tools such as Gearlever otherwise create a launcher that
+    // GNOME cannot associate with the window.
+    glib::set_prgname(Some("org.localsend.localsend_gtk"));
     let runtime = tokio::runtime::Runtime::new().expect("Could not start network runtime");
     let _guard = runtime.enter();
     let app = adw::Application::builder()

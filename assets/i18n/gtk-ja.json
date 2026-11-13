@@ -185,7 +185,7 @@
   "Protocol": "プロトコル",
   "The recipient requires a valid PIN.": "受信者が有効な PINコードを要求しています。",
   "Alias: {alias}\nIP: {ip}\nPort: {port}\nProtocol: HTTPS": "デバイス名: {alias}\nIP: {ip}\nポート: {port}\nプロトコル: HTTPS",
-  "A community GTK4 client for LocalSend.\n\nVersion 0.1.0\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "コミュニティによる LocalSend の GTK4 クライアントです。\n\nバージョン 0.1.0\nRust · GTK4 · Wayland\n\nインターフェイスとロゴは LocalSend（Apache-2.0）を基にしています。このプロジェクトは公式 LocalSend アプリとは独立しています。",
+  "A community GTK4 client for LocalSend.\n\nVersion 0.1.1\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "コミュニティによる LocalSend の GTK4 クライアントです。\n\nバージョン 0.1.1\nRust · GTK4 · Wayland\n\nインターフェイスとロゴは LocalSend（Apache-2.0）を基にしています。このプロジェクトは公式 LocalSend アプリとは独立しています。",
   "1. Open LocalSend on both devices.\n2. Connect both devices to the same local network.\n3. Allow TCP and UDP port 53317 through your firewall (or the port selected in Settings).\n4. Disable access-point isolation on guest Wi-Fi.\n5. Check that a VPN is not blocking local traffic, then refresh.": "1. 両方のデバイスで LocalSend を開きます。\n2. 両方のデバイスを同じローカルネットワークに接続します。\n3. ファイアウォールで TCP と UDP のポート 53317（または設定で選択したポート）を許可します。\n4. ゲスト Wi-Fi のアクセスポイント分離を無効にします。\n5. VPN がローカル通信を妨げていないことを確認してから、更新します。",
   "Compact sidebar on narrow windows": "狭いウィンドウでコンパクトなサイドバーを使用",
   "Keep the left navigation rail instead of showing a bottom bar": "下部バーを表示せず、左側のナビゲーションレールを維持します",

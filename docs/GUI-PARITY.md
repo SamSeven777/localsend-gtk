@@ -34,9 +34,10 @@ receipts, including full incoming message text; switching it off does not clear 
 The automated suite covers history, cancellation, authenticated Favorites Quick save,
 X.509 identity checks, multi-file progress, 14 browser tests, formatting, Clippy, and
 the separate Wayland interaction fixture in both ordinary and high-contrast modes.
-The latest local run passed 105 application tests (2 environment tests run separately),
+The latest local run passed 106 application tests (2 environment tests run separately),
 175 vendored protocol tests (1 external-network test ignored), all 14 browser tests,
-isolated tray interactions, and both Wayland modes.
+isolated tray interactions, and both Wayland modes. AppImage packaging is validated
+with `appimagetool`, `zsyncmake`, embedded update information and checksums.
 Validation combines pure palette vectors, real loopback HTTP/HTTPS protocol tests and GTK
 interaction/rendering on a private Weston compositor. Tests cover ordinary
 and high-contrast appearance, desktop through 360×540 layouts, selection continuation,

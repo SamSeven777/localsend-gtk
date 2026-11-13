@@ -185,7 +185,7 @@
   "Protocol": "通訊協定",
   "The recipient requires a valid PIN.": "接收方要求輸入有效的 PIN 碼。",
   "Alias: {alias}\nIP: {ip}\nPort: {port}\nProtocol: HTTPS": "裝置名稱：{alias}\nIP：{ip}\n連接埠：{port}\n通訊協定：HTTPS",
-  "A community GTK4 client for LocalSend.\n\nVersion 0.1.0\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "由社群開發的 LocalSend GTK4 用戶端。\n\n版本 0.1.0\nRust · GTK4 · Wayland\n\n介面和標誌基於 LocalSend（Apache-2.0）。本專案獨立於官方 LocalSend 應用程式。",
+  "A community GTK4 client for LocalSend.\n\nVersion 0.1.1\nRust · GTK4 · Wayland\n\nInterface and logo based on LocalSend (Apache-2.0). This project is independent of the official LocalSend app.": "由社群開發的 LocalSend GTK4 用戶端。\n\n版本 0.1.1\nRust · GTK4 · Wayland\n\n介面和標誌基於 LocalSend（Apache-2.0）。本專案獨立於官方 LocalSend 應用程式。",
   "1. Open LocalSend on both devices.\n2. Connect both devices to the same local network.\n3. Allow TCP and UDP port 53317 through your firewall (or the port selected in Settings).\n4. Disable access-point isolation on guest Wi-Fi.\n5. Check that a VPN is not blocking local traffic, then refresh.": "1. 在兩部裝置上開啟 LocalSend。\n2. 將兩部裝置連線至同一區域網路。\n3. 在防火牆中允許 TCP 和 UDP 連接埠 53317（或設定中選擇的連接埠）通過。\n4. 關閉訪客 Wi-Fi 的存取點隔離功能。\n5. 檢查 VPN 是否阻擋了區域網路流量，然後重新整理。",
   "Compact sidebar on narrow windows": "窄視窗緊湊側邊欄",
   "Keep the left navigation rail instead of showing a bottom bar": "在視窗較窄時保留左側圖示導覽列，不顯示底部列",

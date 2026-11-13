@@ -82,6 +82,8 @@ need not be pixel-for-pixel identical across different toolkits.
   Completed files are retained; unfinished files are cleaned up before confirmation.
 - Optional desktop tray with navigation and Quit, minimize-to-tray and XDG autostart.
   If the desktop has no tray host, the window remains accessible.
+- Thin AppImage releases with `.zsync` update metadata for Gearlever and
+  AppImageUpdate, plus AppImage-aware autostart and dock association.
 - General/Receive/Send/Network settings, live language/theme controls, and receiver
   Start/Restart/Stop with pending-restart feedback. Listener restarts preserve TLS
   identity and stopping revokes browser links and pending offers.
@@ -150,7 +152,17 @@ bash scripts/package-release.sh
 The script rebuilds the current source, produces DEB, RPM and tar.gz packages in
 `target/dist`, and writes `SHA256SUMS`. It stops if any package cannot be produced.
 Versioned tags must match Cargo.toml, Cargo.lock and the RPM spec. Release notes
-for this update are in [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).
+for this update are in [docs/releases/v0.1.1.md](docs/releases/v0.1.1.md).
+
+The GitHub Actions release also builds a thin AppImage and its
+`AppImage.zsync` update metadata. The AppImage embeds `gh-releases-zsync`
+update information derived from `GITHUB_REPOSITORY`, so a fork release updates
+from that fork and an upstream release updates from upstream without changing
+the workflow. The release is created as a draft; Gearlever and AppImageUpdate
+only detect it after it is published. The AppImage uses the host's
+GTK4/libadwaita runtime and includes `StartupWMClass` so its window is grouped
+with the launcher installed by Gearlever or AppImageLauncher. See
+[packaging/appimage/README.md](packaging/appimage/README.md) for local builds.
 
 All three packages include the application launcher and Dolphin's **Send with
 LocalSend** menu for local files and folders (KDE Frameworks 5.85 or newer).
@@ -160,7 +172,7 @@ its `share` directory must be on the desktop session's XDG data search path for
 the launcher and Dolphin menu to appear. The installer writes absolute executable
 and icon paths, so launching does not depend on adding its `bin` directory to `PATH`.
 
-Package recipes are also provided for Arch Linux (`packaging/aur`) and Flatpak (`packaging/flatpak`), though they are not published to official repositories.
+Package recipes are also provided for Arch Linux (`packaging/aur`) and Flatpak (`packaging/flatpak`), though they are not published to official repositories. A thin AppImage can be built with `scripts/package-appimage.sh`; it uses the system GTK4/libadwaita runtime. See `packaging/appimage/README.md`.
 
 Packages also include a **Send with LocalSend** script for local files and folders
 in GNOME Files (Nautilus). Nautilus discovers scripts only in
@@ -261,10 +273,12 @@ favorite Quick save, X.509 identity checks, multi-file session/per-file progress
 14 browser tests, alongside formatting and warning-free Clippy checks. The separate
 Wayland interaction fixture runs in standard and high-contrast modes, including history
 and receiving details at 360×540, live language changes, and cancellation confirmations
-for replaced sessions. The latest local run passed 105 application tests (2 environment
+for replaced sessions. The latest local run passed 106 application tests (2 environment
 tests run separately), 175 vendored protocol tests (1 external-network test ignored), all
-14 browser tests, isolated tray interactions, and both Wayland modes. Real desktop file-manager and GNOME/KDE portal
-integration still needs hands-on verification.
+14 browser tests, isolated tray interactions, and both Wayland modes. AppImage packaging
+is validated with `appimagetool`, `zsyncmake`, embedded update information and checksum
+verification. Real desktop file-manager and GNOME/KDE portal integration still needs
+hands-on verification.
 
 ```sh
 cargo fmt --all -- --check
