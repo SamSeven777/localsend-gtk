@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-for tool in cargo python3 install strip desktop-file-validate mksquashfs; do
+for tool in cargo rustc python3 install strip desktop-file-validate mksquashfs; do
     command -v "$tool" >/dev/null 2>&1 || {
         echo "Required AppImage packaging tool missing: $tool" >&2
         exit 1
@@ -26,11 +26,17 @@ VERSION="$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb
     echo "Expected a stable Cargo package version, got: $VERSION" >&2
     exit 1
 }
-ARCH="${ARCH:-$(uname -m)}"
-case "$ARCH" in
-    x86_64|aarch64) ;;
-    *) echo "Unsupported AppImage architecture: $ARCH" >&2; exit 1 ;;
+HOST_TARGET="$(rustc -vV | awk '/^host:/ { print $2 }')"
+case "$HOST_TARGET" in
+    x86_64-unknown-linux-gnu) HOST_ARCH="x86_64" ;;
+    aarch64-unknown-linux-gnu) HOST_ARCH="aarch64" ;;
+    *) echo "Unsupported native AppImage target: $HOST_TARGET" >&2; exit 1 ;;
 esac
+ARCH="${ARCH:-$HOST_ARCH}"
+if [[ "$ARCH" != "$HOST_ARCH" ]]; then
+    echo "ARCH=$ARCH does not match native build target $HOST_TARGET; cross-compilation is not supported." >&2
+    exit 1
+fi
 
 # Use the repository that actually triggered the build. This makes fork and
 # upstream releases self-contained: no owner or repository is hard-coded.
@@ -47,8 +53,8 @@ if [[ -n "$APPIMAGE_UPDATE_INFO" ]]; then
     }
 fi
 
-cargo build --release --locked
-BIN="$ROOT/target/release/localsend-gtk"
+cargo build --release --locked --target "$HOST_TARGET" --target-dir "$ROOT/target"
+BIN="$ROOT/target/$HOST_TARGET/release/localsend-gtk"
 [[ -x "$BIN" ]] || { echo "Release binary is missing: $BIN" >&2; exit 1; }
 strip -s "$BIN"
 

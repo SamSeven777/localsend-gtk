@@ -8,6 +8,10 @@ small. A fully self-contained GTK runtime is not included yet.
 
 ## Build
 
+Build natively on x86_64 or aarch64 GNU/Linux. The script uses the Rust host
+target explicitly; an optional `ARCH` must match it. Cross-compilation is not
+supported.
+
 Install `appimagetool` or download `appimagetool-x86_64.AppImage`, then run:
 
 ```sh
@@ -92,8 +96,9 @@ Gearlever or a compatible thumbnailer.
 
 The AppImage runtime sets `APPIMAGE` to the outer AppImage path. The application
 uses that path for XDG autostart instead of the temporary mount, so **Launch at
-startup** keeps working after the AppImage is closed or moved. The setting is
-optional and never enabled automatically.
+startup** keeps working after the AppImage is closed. If you move the file,
+disable and re-enable the setting from its new location to update the saved
+path. The setting is optional and never enabled automatically.
 
 ## Runtime requirements
 
