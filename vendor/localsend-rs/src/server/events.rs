@@ -130,8 +130,7 @@ pub struct PendingRequest {
 }
 
 impl PendingRequest {
-    // Not yet called outside tests: handler wiring lands in Task 2.2.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn new(
         sender: DeviceInfo,
         files: HashMap<FileId, FileMetadata>,

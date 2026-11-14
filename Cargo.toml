@@ -21,7 +21,7 @@ glib = "0.20"
 material-colors = "=0.4.2"
 
 # LocalSend Protocol
-localsend-rs = { git = "https://github.com/CrossCopy/localsend-rs.git", rev = "428981a012c77404e2605ae7b630b50bcbe8ce0f", default-features = false, features = ["https"] }
+localsend-rs = { git = "https://github.com/CrossCopy/localsend-rs.git", rev = "7e386ac916c2401a241c4a4d75672f7798227444", default-features = false, features = ["https"] }
 
 # Async runtime & Channels
 tokio = { version = "1.40", features = ["full"] }

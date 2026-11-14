@@ -516,7 +516,7 @@ struct ReceiveProgressContext {
 }
 
 impl ReceiveProgressContext {
-    // Preserve the upstream MSRV; the replacement API is newer than it.
+    // Keep compatibility with Rust versions before AtomicU64::try_update.
     #[allow(deprecated)]
     fn add(&self, amount: u64, file_bytes_received: u64) {
         let previous = self
