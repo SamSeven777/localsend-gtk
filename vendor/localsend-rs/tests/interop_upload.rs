@@ -5,6 +5,92 @@ use localsend_rs::{DeviceInfo, LocalSendClient, Protocol, build_file_metadata, s
 use std::collections::HashMap;
 
 #[tokio::test]
+async fn failed_upload_resets_file_progress_and_can_be_retried() {
+    let output = tempfile::tempdir().unwrap();
+    let input = tempfile::tempdir().unwrap();
+    let (mut server, mut events) = LocalSendServer::builder()
+        .port(0)
+        .save_dir(output.path())
+        .protocol(Protocol::Http)
+        .auto_accept(true)
+        .build()
+        .await
+        .unwrap();
+    let (path, _) = common::make_random_file(input.path(), "retry.bin", 1024);
+    let meta = build_file_metadata(&path).await.unwrap();
+    let id = meta.id.clone();
+    let client = LocalSendClient::new(DeviceInfo::new("sender".into(), 0, Protocol::Http));
+    let target = common::target_device(server.port());
+    let prep = client
+        .prepare_upload(&target, HashMap::from([(id.clone(), meta)]), None)
+        .await
+        .unwrap();
+    let mut url = reqwest::Url::parse(&format!(
+        "http://127.0.0.1:{}/api/localsend/v2/upload",
+        server.port()
+    ))
+    .unwrap();
+    url.query_pairs_mut().extend_pairs([
+        ("sessionId", prep.session_id.as_str()),
+        ("fileId", id.as_str()),
+        ("token", prep.files[&id].as_str()),
+    ]);
+    localsend_rs::crypto::ensure_crypto_provider();
+    let response = reqwest::Client::builder()
+        .no_proxy()
+        .build()
+        .unwrap()
+        .post(url)
+        .body(vec![1_u8; 512])
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(
+        response.status(),
+        reqwest::StatusCode::INTERNAL_SERVER_ERROR
+    );
+    let mut last_progress = None;
+    while let Ok(event) = events.try_recv() {
+        if let ServerEvent::FileReceiveProgress {
+            bytes_received,
+            file_bytes_received,
+            file_size,
+            ..
+        } = event
+        {
+            assert_eq!(file_size, 1024);
+            last_progress = Some((bytes_received, file_bytes_received));
+        }
+    }
+    assert_eq!(last_progress, Some((0, 0)));
+    assert_eq!(std::fs::read_dir(output.path()).unwrap().count(), 0);
+    client
+        .upload_file(
+            &target,
+            &prep.session_id,
+            &id,
+            &prep.files[&id],
+            &path,
+            None,
+        )
+        .await
+        .unwrap();
+    while let Ok(event) = events.try_recv() {
+        if let ServerEvent::FileReceiveProgress {
+            bytes_received,
+            file_bytes_received,
+            ..
+        } = event
+        {
+            assert_eq!(bytes_received, file_bytes_received);
+            last_progress = Some((bytes_received, file_bytes_received));
+        }
+    }
+    assert_eq!(last_progress, Some((1024, 1024)));
+    server.stop().await;
+}
+
+#[tokio::test]
 async fn uploads_a_file_byte_for_byte_rs_to_rs() {
     let save_dir = tempfile::tempdir().expect("save dir");
     let src_dir = tempfile::tempdir().expect("src dir");
@@ -152,7 +238,11 @@ async fn multi_file_progress_separates_session_and_current_file_bytes() {
         .expect("first upload");
 
     loop {
-        match events.recv().await.expect("first upload event") {
+        match tokio::time::timeout(std::time::Duration::from_secs(5), events.recv())
+            .await
+            .expect("first upload timeout")
+            .expect("first upload event")
+        {
             ServerEvent::FileReceiveProgress {
                 file_id,
                 bytes_received,
@@ -186,7 +276,11 @@ async fn multi_file_progress_separates_session_and_current_file_bytes() {
 
     let mut final_sample = None;
     loop {
-        match events.recv().await.expect("second upload event") {
+        match tokio::time::timeout(std::time::Duration::from_secs(5), events.recv())
+            .await
+            .expect("second upload timeout")
+            .expect("second upload event")
+        {
             ServerEvent::FileReceiveProgress {
                 file_id,
                 bytes_received,

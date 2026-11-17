@@ -40,7 +40,7 @@ use tokio_rustls::server::TlsStream;
 #[cfg(feature = "https")]
 use tower::Service;
 #[cfg(feature = "https")]
-use x509_parser::{asn1_rs::FromDer, certificate::X509Certificate, time::ASN1Time};
+use x509_parser::{asn1_rs::FromDer, certificate::X509Certificate};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AuthenticatedPeer {
@@ -183,44 +183,29 @@ impl ClientCertVerifier for AnyClientCertificateVerifier {
         // Web Share is mounted on this listener and can be enabled without a
         // server restart, so browsers and older clients must be able to connect
         // without a certificate. Such connections deliberately receive no
-        // `AuthenticatedPeer`; any certificate that is presented is fully
-        // validated below and by the subsequent TLS CertificateVerify step.
+        // `AuthenticatedPeer`; any certificate that is presented must parse and prove possession of
+        // its private key in the subsequent TLS CertificateVerify step.
         false
     }
 
     fn root_hint_subjects(&self) -> &[DistinguishedName] {
-        self.signatures.root_hint_subjects()
+        &[]
     }
 
     fn verify_client_cert(
         &self,
         end_entity: &CertificateDer<'_>,
         _intermediates: &[CertificateDer<'_>],
-        now: UnixTime,
+        _now: UnixTime,
     ) -> Result<ClientCertVerified, Error> {
-        let (remaining, certificate) = X509Certificate::from_der(end_entity.as_ref())
+        let (remaining, _) = X509Certificate::from_der(end_entity.as_ref())
             .map_err(|_| Error::InvalidCertificate(CertificateError::BadEncoding))?;
         if !remaining.is_empty() {
             return Err(Error::InvalidCertificate(CertificateError::BadEncoding));
         }
 
-        let timestamp = i64::try_from(now.as_secs())
-            .ok()
-            .and_then(|seconds| ASN1Time::from_timestamp(seconds).ok())
-            .ok_or(Error::InvalidCertificate(CertificateError::BadEncoding))?;
-        if timestamp < certificate.validity().not_before {
-            return Err(Error::InvalidCertificate(CertificateError::NotValidYet));
-        }
-        if timestamp > certificate.validity().not_after {
-            return Err(Error::InvalidCertificate(CertificateError::Expired));
-        }
-        certificate
-            .verify_signature(None)
-            .map_err(|_| Error::InvalidCertificate(CertificateError::BadSignature))?;
-
-        // LocalSend peers are named by a self-signed leaf rather than a shared
-        // CA. The checks above validate that leaf; rustls next verifies the TLS
-        // CertificateVerify signature with it, proving possession of its key.
+        // There is no shared CA or expiry policy for LocalSend identities.
+        // rustls verifies the handshake signature next, proving key possession.
         Ok(ClientCertVerified::assertion())
     }
 

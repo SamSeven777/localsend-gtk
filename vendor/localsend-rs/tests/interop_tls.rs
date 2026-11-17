@@ -65,6 +65,7 @@ async fn builder_uses_the_supplied_certificate_fingerprint_for_https() {
         .await
         .expect("start HTTPS receiver");
 
+    localsend_rs::crypto::ensure_crypto_provider();
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()
@@ -102,6 +103,7 @@ async fn builder_generates_a_nonempty_https_fingerprint_when_none_is_supplied() 
         .await
         .expect("start HTTPS receiver");
 
+    localsend_rs::crypto::ensure_crypto_provider();
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()
@@ -238,9 +240,29 @@ async fn receiver_exposes_the_authenticated_client_certificate_fingerprint() {
 }
 
 #[tokio::test]
-async fn receiver_rejects_an_expired_client_certificate_during_the_tls_handshake() {
+async fn receiver_accepts_an_expired_client_certificate_with_proof_of_key() {
+    assert_receiver_accepts_certificate(expired_client_certificate()).await;
+}
+
+#[tokio::test]
+async fn receiver_accepts_a_client_certificate_with_an_invalid_self_signature() {
+    use base64::{Engine, engine::general_purpose::STANDARD};
+    let mut certificate = generate_tls_certificate().expect("client certificate");
+    *certificate
+        .cert_der
+        .last_mut()
+        .expect("certificate signature") ^= 1;
+    certificate.cert_pem = format!(
+        "-----BEGIN CERTIFICATE-----\n{}\n-----END CERTIFICATE-----\n",
+        STANDARD.encode(&certificate.cert_der)
+    );
+    // Keep the claim consistent with the presented leaf.
+    certificate.fingerprint = localsend_rs::sha256_from_bytes(&certificate.cert_der);
+    assert_receiver_accepts_certificate(certificate).await;
+}
+
+async fn assert_receiver_accepts_certificate(client_certificate: TlsCertificate) {
     let output = tempfile::tempdir().expect("output directory");
-    let client_certificate = expired_client_certificate();
     let (mut server, _events) = LocalSendServer::builder()
         .alias("Certificate-validating receiver")
         .port(0)
@@ -252,18 +274,18 @@ async fn receiver_rejects_an_expired_client_certificate_during_the_tls_handshake
 
     let mut target = server.device().clone();
     target.ip = Some("127.0.0.1".into());
-    let sender = DeviceInfo::new("Expired sender".into(), 0, Protocol::Https);
+    let sender = DeviceInfo::new("Invalid certificate sender".into(), 0, Protocol::Https);
     let client = LocalSendClient::with_trust_policy_and_client_certificate(
         sender,
         TlsTrustPolicy::new([target.fingerprint.clone()]),
         &client_certificate,
     )
-    .expect("mTLS client with expired certificate");
+    .expect("mTLS client with invalid certificate");
 
-    assert!(
-        client.register(&target).await.is_err(),
-        "an expired peer certificate must fail before any HTTP request is served"
-    );
+    client
+        .register(&target)
+        .await
+        .expect("the TLS handshake proves possession of the certificate key");
 
     server.stop().await;
 }
